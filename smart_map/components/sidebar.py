@@ -11,20 +11,28 @@ def sidebar():
     with st.sidebar:
         st.markdown(
             "## How to use\n"
-            "1. Enter your [OpenAI API key](https://platform.openai.com/account/api-keys) below🔑\n"  # noqa: E501
-            "2. Upload a csv file with the template schema you would like to map to.📄\n"
-            "3. Upload the csv file of the table you are mapping.\n"
+            "1. Upload a csv file with the template schema you would like to map to.📄\n"
+            "2. Upload the csv file of the table you are mapping.\n"
+            "3. Allow AI to figure out how to map your table."
         )
-        api_key_input = st.text_input(
-            "OpenAI API Key",
-            type="password",
-            placeholder="Paste your OpenAI API key here (sk-...)",
-            help="You can get your API key from https://platform.openai.com/account/api-keys.",  # noqa: E501
-            value=os.environ.get("OPENAI_API_KEY", None)
-            or st.session_state.get("OPENAI_API_KEY", ""),
-        )
+        # api_key_input = st.text_input(
+        #     "OpenAI API Key",
+        #     type="password",
+        #     placeholder="Paste your OpenAI API key here (sk-...)",
+        #     help="You can get your API key from https://platform.openai.com/account/api-keys.",  # noqa: E501
+        #     value=os.environ.get("OPENAI_API_KEY", None)
+        #     or st.session_state.get("OPENAI_API_KEY", ""),
+        # )
 
-        st.session_state["OPENAI_API_KEY"] = api_key_input
+        # st.session_state["OPENAI_API_KEY"] = api_key_input
+        model_name = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
+        # Map model names to OpenAI model IDs
+        if model_name == "GPT-3.5":
+            model = "gpt-3.5-turbo"
+        else:
+            model = "gpt-4"
+        
+        st.session_state.model = model
 
         st.markdown("---")
         st.markdown("# About")

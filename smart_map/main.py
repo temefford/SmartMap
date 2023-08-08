@@ -40,17 +40,16 @@ bootstrap_caching()
 
 sidebar()
 
-
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 
 #openai_api_key = st.session_state.get("OPENAI_API_KEY")
 
-if not openai_api_key:
-    st.warning(
-        "Enter your OpenAI API key in the sidebar. You can get a key at"
-        " https://platform.openai.com/account/api-keys."
-    )
+# if not openai_api_key:
+#     st.warning(
+#         "Enter your OpenAI API key in the sidebar. You can get a key at"
+#         " https://platform.openai.com/account/api-keys."
+#     )
 
     
 if 'chain_output' not in st.session_state:
@@ -150,7 +149,7 @@ def main():
                     st.stop()
 
                 llm = OpenAI(
-                        temperature=0.1, openai_api_key=openai_api_key, model_name="gpt-3.5-turbo"
+                        temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
                     )
             
                 if st.button("Begin Table Mapping", type="primary"):
