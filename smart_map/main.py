@@ -74,8 +74,7 @@ if 'table_b' not in st.session_state:
     st.session_state['table_b'] = False
 
 
-def create_chains(input_tables):
-    tables = input_tables
+def create_chains():
     llm = OpenAI(
             temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
         )
@@ -247,15 +246,7 @@ def main():
                     st.stop()
                
                 if st.button("Begin Table Mapping", type="primary"):
-                    overall_chain = create_chains(tables_prompt = f"""
-                    Here is the template table: \n
-                    {template_string}
-                    
-                    Here is the table (table A) to be mapped into the template schema: \n
-                    {upload_string}
-                    
-                    \n
-                    """)
+                    overall_chain = create_chains()
                     st.session_state.overall_chain=overall_chain
                     with st.spinner(
                             "Generating Mapping"
