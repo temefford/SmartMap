@@ -41,10 +41,10 @@ bootstrap_caching()
 sidebar()
 
 
-# openai_api_key = st.secrets["OPENAI_API_KEY"]
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 
-openai_api_key = st.session_state.get("OPENAI_API_KEY")
+#openai_api_key = st.session_state.get("OPENAI_API_KEY")
 
 if not openai_api_key:
     st.warning(
@@ -216,6 +216,7 @@ def main():
                     Format your response in python language returning the complete, executable codeblock, and with each line of code described with a markdown comment.
                     Only provide the mapping for relevant to the columns in the template but make it dynamic to account for potential alternative columns.
                     There should be no code to map to a column that is not in the template table.
+                    Be sure to perform the necessary data manipulation on column values to make the values of table A match the format of the template, such as reformatting date and removing hyphens.
                     """
                     prompt_template = PromptTemplate(input_variables=["tables","initial","mapping"], template=template)
                     mapping_code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping_code")
