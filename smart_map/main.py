@@ -291,7 +291,7 @@ def main():
                 convert_table_func = create_function_from_string(user_edit_code)
 
                 table_a_conv = convert_table_func(upload_df)   
-                st.session_state.convert_function = convert_table_func
+                #st.session_state.convert_function = convert_table_func
                 with st.expander("Show converted table"):
                     st.write(table_a_conv)
                 with st.expander("Show Table A"):
