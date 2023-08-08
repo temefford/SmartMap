@@ -223,6 +223,9 @@ def main():
                     template = """
                     For the following code, return a function that takes a pandas dataframe and uses the specifed column mappings to return a properly formatted dataframe. Return only the executable python code.
                     Do not include any single quotes or reference, return just the code that can be copy-pasted into python.
+                    Be sure to include transformation steps: 
+                    1. reformatting date column in necessary
+                    2. removing - from string data to make columns match template
 
                     Here is the code:
                     {mapping_code}
