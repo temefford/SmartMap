@@ -290,6 +290,14 @@ def main():
                     st.write(table_a_conv)
                 with st.expander("Show Table A table"):
                     st.write(upload_df)
+                
+                st.download_button(
+                "Press to Download",
+                table_a_conv.to_csv(index=False).encode('utf-8'),
+                "table_a.csv",
+                "",
+                key='download-csv'
+                )
 
     with st.container():
         if st.session_state.code_runs:         
@@ -353,27 +361,13 @@ def main():
                     st.write(table_b_conv)
                 with st.expander("Show original Table B table"):
                     st.write(upload_df_b)
-
-                    
-                
-                #st.markdown(sim_chain_seq.run(tables_prompt_b))
-
-                # correct_mapping_b = st.button("The mapping for Table B is correct", type="primary")
-                # if correct_mapping_b:
-                #     user_edit_code_b = st.text_area(
-                #         label='Generated code for Table B',
-                #         value=data_mapping_chain.run(tables_prompt_b),
-                #         height=300,
-                #         max_chars=None,
-                #         key=None,
-                #     )
-
-                #     if st.button("Run Code for Table B"):
-                #         try:
-                #             exec(user_edit_code_b)
-                #             st.success("Code executed successfully for Table B")
-                #         except Exception as e:
-                #             st.error(f"An error occurred: {e}")
+                st.download_button(
+                "Press to Download",
+                table_b_conv.to_csv(index=False).encode('utf-8'),
+                "table_b.csv",
+                "",
+                key='download-csv'
+                )
 
 if __name__ == "__main__":
     main()
