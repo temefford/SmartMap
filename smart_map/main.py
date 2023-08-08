@@ -243,7 +243,7 @@ def main():
                         temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
                 )
                 if st.button("Begin Table Mapping", type="primary"):
-                    overall_chain = create_chains(llm)
+                    overall_chain = create_chains()
                     st.session_state.overall_chain=overall_chain
                     with st.spinner(
                             "Generating Mapping"
