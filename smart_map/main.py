@@ -320,23 +320,21 @@ def main():
                     st.session_state['table_b']=upload_string_b
                 except Exception as e:
                     display_file_read_error(e)
-    with st.container():
-         if st.session_state.table_b: 
-            tables_b_prompt = f"""
-                        Here is the template table: \n
-                        {template_string}
-                        
-                        Here is the table (table B) to be mapped into the template schema: \n
-                        {st.session_state.table_b}
-                        \n
-                        """
-            b_chain = create_chains()
-            st.session_state.overall_b_chain=b_chain
-            with st.spinner(
-                    "Generating Mapping"
-                ):
-                    chain_output = b_chain(tables_b_prompt)
-                    st.session_state.chain_b_output=chain_output
+                tables_b_prompt = f"""
+                            Here is the template table: \n
+                            {template_string}
+                            
+                            Here is the table (table B) to be mapped into the template schema: \n
+                            {st.session_state.table_b}
+                            \n
+                            """
+                b_chain = create_chains()
+                st.session_state.overall_b_chain=b_chain
+                with st.spinner(
+                        "Generating Mapping"
+                    ):
+                        chain_output = b_chain(tables_b_prompt)
+                        st.session_state.chain_b_output=chain_output
 
     with st.container():
         if st.session_state.chain_b_output:
