@@ -289,17 +289,13 @@ def main():
                     st.error(f"An error occurred: {e}")
                 
                 convert_table_func = create_function_from_string(user_edit_code)
-    
+
                 table_a_conv = convert_table_func(upload_df)   
                 st.session_state.convert_function = convert_table_func
-                st.session_state.chain_output["table_a_conv"] = table_a_conv
-    with st.container():
-        if st.session_state.chain_output.table_a_conv:
-            table_a_conv=st.session_state.chain_output.table_a_conv
-            with st.expander("Show converted table"):
-                st.write(table_a_conv)
-            with st.expander("Show Table A table"):
-                st.write(upload_df)
+                with st.expander("Show converted table"):
+                    st.write(table_a_conv)
+                with st.expander("Show Table A table"):
+                    st.write(upload_df)
                 
                 st.download_button(
                 "Press to Download",
