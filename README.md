@@ -36,6 +36,77 @@ cd smart_map
 streamlit run main.py
 ```
 
+### Approach for retraining
+
+## Approach for Retraining on Transformation Logic
+
+### 1. **Maintain a History of Transformations**:
+Whenever a user edits a transformation logic or successfully maps one table to another, store the mapping in a structured format.
+
+### Structure Example:
+- **Template Table Format**
+- **Input Table Format**
+- **Mapping Logic Used**: Column matchings, transformations applied, etc.
+- **User Edits**: What the user changed in the proposed logic.
+- **Output Table Format**: Result after transformation.
+
+### 2. **Feedback Loop**:
+Allow users to flag if a mapping or transformation was correct or if it had issues. This feedback will be crucial for retraining.
+
+### 3. **Generate Synthetic Examples**:
+- Using the history of transformations and feedback, generate synthetic examples by creating variations in table columns, data types, and data distributions.
+- Consider creating mismatches, renaming columns, changing data distributions, adding noise, etc.
+
+### 4. **Retraining**:
+- Use the stored history of transformations, user edits, and synthetic examples as a dataset.
+- Retrain the model on this dataset so it learns the common patterns, successful transformations, and user preferences.
+- The training can involve training the model to predict correct mappings or even to generate transformation code snippets.
+
+## Implementation on Synthetic Examples:
+
+For simplicity, let's focus on generating synthetic examples and then discuss a simplistic retraining step.
+
+```python
+import random
+
+# Sample transformations history
+history = [
+    {
+        "template_format": ["name", "age", "address"],
+        "input_format": ["full_name", "years_old", "addr"],
+        "mapping": {
+            "full_name": "name",
+            "years_old": "age",
+            "addr": "address"
+        }
+    }
+]
+
+# Generate synthetic example by randomly renaming columns
+def generate_synthetic_example(example):
+    synthetic_example = example.copy()
+    renames = {
+        "full_name": ["fullname", "name_full"],
+        "years_old": ["age_in_years", "years_of_age"],
+        "addr": ["residence", "location"]
+    }
+    for col, possibilities in renames.items():
+        if col in synthetic_example["input_format"]:
+            synthetic_example["input_format"][synthetic_example["input_format"].index(col)] = random.choice(possibilities)
+    return synthetic_example
+
+synthetic_example = generate_synthetic_example(history[0])
+print(synthetic_example)
+
+# Retraining step (conceptual)
+# In a real-world scenario, you'd use this synthetic data to retrain the model.
+# Here, we'll just update the history as a placeholder for the retraining process.
+history.append(synthetic_example)
+print(history)
+```
+
+This is a basic example. In a production environment, you'd have a more sophisticated system of generating synthetic examples, storing history, and a more complex retraining mechanism that makes use of machine learning or other techniques to learn from the history and synthetic data.
+
 
 ### Some edge cases and potential solutions:
 #### 1. **Similar Column Names but Different Data**:
