@@ -152,14 +152,14 @@ def create_chains():
     Be sure to include transformation steps: 
     1. reformatting date column in necessary
     2. removing - from string data to make columns match template
-
+    {mapping}
     Here is the code:
     {mapping_code}
 
     Do not include any unnecessary lines like ('''python) and do not return any examples. Only return the function that takes a table and converts it to the desired schema.
     Make sure that the code maps the appropriate columns and values from Table A to the template. If the code does not, either fix it or report an issue.
     """
-    prompt_template = PromptTemplate(input_variables=["mapping_code"], template=template)
+    prompt_template = PromptTemplate(input_variables=["tables, mapping, mapping_code"], template=template)
     code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
 
 
