@@ -40,10 +40,10 @@ bootstrap_caching()
 
 sidebar()
 
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+#openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 
-#openai_api_key = st.session_state.get("OPENAI_API_KEY")
+openai_api_key = "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"
 
 # if not openai_api_key:
 #     st.warning(
@@ -151,7 +151,7 @@ def create_chains():
     Do not include any single quotes or reference, return just the code that can be copy-pasted into python.
     Be sure to include transformation steps: 
     1. reformatting date column in necessary
-    2. removing - from string data to make columns match template
+    2. removing "-" from string data to make columns match template. Specifically, remove from the PolicyNumber column.
     {mapping}
     Here is the code:
     {mapping_code}
@@ -159,7 +159,7 @@ def create_chains():
     Do not include any unnecessary lines like ('''python) and do not return any examples. Only return the function that takes a table and converts it to the desired schema.
     Make sure that the code maps the appropriate columns and values from Table A to the template. If the code does not, either fix it or report an issue.
     """
-    prompt_template = PromptTemplate(input_variables=["tables, mapping, mapping_code"], template=template)
+    prompt_template = PromptTemplate(input_variables=["tables", "mapping", "mapping_code"], template=template)
     code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
     
     overall_chain = SequentialChain(
@@ -332,7 +332,7 @@ def main():
                         {st.session_state.table_b}
                         \n
                         """
-            b_chain = create_chains(tables_b_prompt)
+            b_chain = create_chains()
             st.session_state.overall_b_chain=b_chain
             with st.spinner(
                     "Generating Mapping"
