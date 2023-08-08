@@ -40,10 +40,8 @@ bootstrap_caching()
 
 sidebar()
 
-#openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-
-openai_api_key = "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"
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+#openai_api_key = 
 
 # if not openai_api_key:
 #     st.warning(
