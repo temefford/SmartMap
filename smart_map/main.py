@@ -325,7 +325,7 @@ def main():
                             {template_string}
                             
                             Here is the table (table B) to be mapped into the template schema: \n
-                            {st.session_state.table_b}
+                            {upload_string_b}
                             \n
                             """
                 if st.button("Begin Table Mapping:", type="primary"):
@@ -339,7 +339,7 @@ def main():
 
     with st.container():
         if st.session_state.chain_b_output:
-            upload_string_b, upload_df_b = load_template(upload_file_b)
+            upload_string_b, upload_df_b = load_template(st.session_state['table_b'])
             st.subheader("Python Code for Table B Conversion")
             st.markdown("Below is the code that will map your data table into the schema matching the template. Please review, make any desired modifications, and click run to confirm that the code exectutes.")
             # Verify and edit the generated code
