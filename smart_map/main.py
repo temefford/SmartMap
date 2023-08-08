@@ -70,11 +70,11 @@ if 'overall_chain' not in st.session_state:
 if 'table_b' not in st.session_state:
     st.session_state['table_b'] = False
 
-llm = OpenAI(
-            temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
-        )
 
 def create_chains():
+    llm = OpenAI(
+            temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
+        )
     # Chain  1
     template = """Your task is to map a table that is formatted as a csv into the schema defined by a template\
     by transferring values and transforming values into the target format of the Template table.
@@ -239,8 +239,11 @@ def main():
                 #### Send first prompt to openai
                 if not is_open_ai_key_valid(openai_api_key):
                     st.stop()
+                llm = OpenAI(
+                        temperature=0.1, openai_api_key=openai_api_key, model_name=st.session_state.model
+                )
                 if st.button("Begin Table Mapping", type="primary"):
-                    overall_chain = create_chains()
+                    overall_chain = create_chains(llm)
                     st.session_state.overall_chain=overall_chain
                     with st.spinner(
                             "Generating Mapping"
