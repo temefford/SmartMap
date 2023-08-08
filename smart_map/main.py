@@ -294,7 +294,7 @@ def main():
                 st.session_state.convert_function = convert_table_func
                 with st.expander("Show converted table"):
                     st.write(table_a_conv)
-                with st.expander("Show Table A table"):
+                with st.expander("Show Table A"):
                     st.write(upload_df)
                 
                 st.download_button(
