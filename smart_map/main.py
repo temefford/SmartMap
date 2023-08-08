@@ -70,7 +70,97 @@ if 'overall_chain' not in st.session_state:
 if 'table_b' not in st.session_state:
     st.session_state['table_b'] = False
 
- 
+def create_chains():
+    # Chain  1
+    template = """Your task is to map a table that is formatted as a csv into the schema defined by a template\
+    by transferring values and transforming values into the target format of the Template table.
+    {tables}
+    Extract information about the columns of the Template table and table A in the format of a text description. All of the data\
+    is passed as text but if the text is numeric, describe the column data as numeric. 
+    Format your response in markdown language using two tables. 
+    The first table describes the template table where the first column contains the column name, the second contains the interpreted type of data, and the third gives a description of what that data appears to be.
+    The second table describes the Table A where the first column contains the column name, the second contains the interpreted type of data, and the third gives a description of what that data appears to be.
+"""
+    prompt_template = PromptTemplate(input_variables=["tables"], template=template)
+    initial_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="initial")
+
+    # Chain 2
+    template = """
+    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
+    {tables}
+    Here is a description of the tables:
+    {initial}
+    Your goal is to figure out the mapping between columns from the input table to the template table
+    based on the column names and data value types, describe this mapping like a dictionary mapping.
+    For each column in the template table, suggest columns from table A (1 or more relevant candidates), 
+    showing the basis for the decision (formats, distributions, and other features that are highlighted in the backend).
+    If more than 1 column can map from table A to the template, include both as other tables that use this mapping may have either of the possible columns.
+    Format your response in markdown language as a table where the first column represents the template column, the second column\
+        represents the column from Table A that is being mapped to the template column, and the third column explains the reasoning.
+        
+    """
+    prompt_template = PromptTemplate(input_variables=["tables","initial"], template=template)
+    find_similar_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="find_similar")
+
+    template = """
+    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
+    {tables}
+    Here is a description of the tables:
+    {initial}
+    and here are the projected column-column pairs:
+    {find_similar}
+    For each of the columns that is mapped from A to the template, does the value of A match that of the value for the corresponding row in template?
+    Does any transformation need to be applied to make the value match, such as changing the style of the datetime? Are there differences in characters, such as dashes, - , that need to be removed?
+
+    For text data columns like policy, do you need to remove a hyphen, -, to make the columns match?
+    Do you need to reformat data columns to match?
+    """
+    prompt_template = PromptTemplate(input_variables=["tables","initial","find_similar"], template=template)
+    data_mapping_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping")
+
+    template = """
+    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
+    {tables}
+    Here is a description of the tables:
+    {initial}
+    and here are the original column-column pairs to match from Table A to template schema:
+    {mapping}
+
+    Automatically generate data mapping code for each column display in the final Template format. 
+    For example, for date columns, they may be in different formats, and it is necessary to change the order. 
+    If more than one column maps from Table A to the template table column, create a dynamic mapping that can convert either without running into an error.
+    Define a function that maps an input table that has schema similar to Table A (upload_df) to schema of template, with the correct naming convention from the template.
+    Format your response in python language returning the complete, executable codeblock, and with each line of code described with a markdown comment.
+    Only provide the mapping for relevant to the columns in the template but make it dynamic to account for potential alternative columns.
+    There should be no code to map to a column that is not in the template table.
+    Be sure to perform the necessary data manipulation on column values to make the values of table A match the format of the template, such as reformatting date and removing hyphens.
+    """
+    prompt_template = PromptTemplate(input_variables=["tables","initial","mapping"], template=template)
+    mapping_code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping_code")
+    
+    template = """
+    For the following code, return a function that takes a pandas dataframe and uses the specifed column mappings to return a properly formatted dataframe. Return only the executable python code.
+    Do not include any single quotes or reference, return just the code that can be copy-pasted into python.
+    Be sure to include transformation steps: 
+    1. reformatting date column in necessary
+    2. removing - from string data to make columns match template
+
+    Here is the code:
+    {mapping_code}
+
+    Do not include any unnecessary lines like ('''python) and do not return any examples. Only return the function that takes a table and converts it to the desired schema.
+
+    """
+    prompt_template = PromptTemplate(input_variables=["mapping_code"], template=template)
+    code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
+    overall_chain = SequentialChain(
+                        chains=[initial_chain, find_similar_chain, data_mapping_chain, mapping_code_chain, code_chain],
+                        input_variables=["tables"],
+                        output_variables=["initial","find_similar","mapping","mapping_code","code"],
+                        verbose=True,
+                    )
+    return overall_chain
+
 
 def create_function_from_string(func_string):
     """
@@ -142,8 +232,6 @@ def main():
                     
                     \n
                     """
-
-                print(tables_prompt)
                 #### Send first prompt to openai
                 if not is_open_ai_key_valid(openai_api_key):
                     st.stop()
@@ -153,95 +241,7 @@ def main():
                     )
             
                 if st.button("Begin Table Mapping", type="primary"):
-                    # Chain  1
-                    template = """Your task is to map a table that is formatted as a csv into the schema defined by a template\
-                    by transferring values and transforming values into the target format of the Template table.
-                    {tables}
-                    Extract information about the columns of the Template table and table A in the format of a text description. All of the data\
-                    is passed as text but if the text is numeric, describe the column data as numeric. 
-                    Format your response in markdown language using two tables. 
-                    The first table describes the template table where the first column contains the column name, the second contains the interpreted type of data, and the third gives a description of what that data appears to be.
-                    The second table describes the Table A where the first column contains the column name, the second contains the interpreted type of data, and the third gives a description of what that data appears to be.
-                """
-                    prompt_template = PromptTemplate(input_variables=["tables"], template=template)
-                    initial_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="initial")
-
-                    # Chain 2
-                    template = """
-                    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
-                    {tables}
-                    Here is a description of the tables:
-                    {initial}
-                    Your goal is to figure out the mapping between columns from the input table to the template table
-                    based on the column names and data value types, describe this mapping like a dictionary mapping.
-                    For each column in the template table, suggest columns from table A (1 or more relevant candidates), 
-                    showing the basis for the decision (formats, distributions, and other features that are highlighted in the backend).
-                    If more than 1 column can map from table A to the template, include both as other tables that use this mapping may have either of the possible columns.
-                    Format your response in markdown language as a table where the first column represents the template column, the second column\
-                        represents the column from Table A that is being mapped to the template column, and the third column explains the reasoning.
-                        
-                    """
-                    prompt_template = PromptTemplate(input_variables=["tables","initial"], template=template)
-                    find_similar_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="find_similar")
-
-                    template = """
-                    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
-                    {tables}
-                    Here is a description of the tables:
-                    {initial}
-                    and here are the projected column-column pairs:
-                    {find_similar}
-                    For each of the columns that is mapped from A to the template, does the value of A match that of the value for the corresponding row in template?
-                    Does any transformation need to be applied to make the value match, such as changing the style of the datetime? Are there differences in characters, such as dashes, - , that need to be removed?
-
-                    For text data columns like policy, do you need to remove a hyphen, -, to make the columns match?
-                    Do you need to reformat data columns to match?
-                    """
-                    prompt_template = PromptTemplate(input_variables=["tables","initial","find_similar"], template=template)
-                    data_mapping_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping")
-
-                    template = """
-                    Here are the tables we are using to create a mapping function from the example (Table A) to the template schema (tempate):
-                    {tables}
-                    Here is a description of the tables:
-                    {initial}
-                    and here are the original column-column pairs to match from Table A to template schema:
-                    {mapping}
-
-                    Automatically generate data mapping code for each column display in the final Template format. 
-                    For example, for date columns, they may be in different formats, and it is necessary to change the order. 
-                    If more than one column maps from Table A to the template table column, create a dynamic mapping that can convert either without running into an error.
-                    Define a function that maps an input table that has schema similar to Table A (upload_df) to schema of template, with the correct naming convention from the template.
-                    Format your response in python language returning the complete, executable codeblock, and with each line of code described with a markdown comment.
-                    Only provide the mapping for relevant to the columns in the template but make it dynamic to account for potential alternative columns.
-                    There should be no code to map to a column that is not in the template table.
-                    Be sure to perform the necessary data manipulation on column values to make the values of table A match the format of the template, such as reformatting date and removing hyphens.
-                    """
-                    prompt_template = PromptTemplate(input_variables=["tables","initial","mapping"], template=template)
-                    mapping_code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping_code")
-                    
-                    template = """
-                    For the following code, return a function that takes a pandas dataframe and uses the specifed column mappings to return a properly formatted dataframe. Return only the executable python code.
-                    Do not include any single quotes or reference, return just the code that can be copy-pasted into python.
-                    Be sure to include transformation steps: 
-                    1. reformatting date column in necessary
-                    2. removing - from string data to make columns match template
-
-                    Here is the code:
-                    {mapping_code}
-
-                    Do not include any unnecessary lines like ('''python) and do not return any examples. Only return the function that takes a table and converts it to the desired schema.
-
-                    """
-                    prompt_template = PromptTemplate(input_variables=["mapping_code"], template=template)
-                    code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
-                    
-                    overall_chain = SequentialChain(
-                        chains=[initial_chain, find_similar_chain, data_mapping_chain, mapping_code_chain, code_chain],
-                        input_variables=["tables"],
-                        output_variables=["initial","find_similar","mapping","mapping_code","code"],
-                        verbose=True,
-                    )
+                    overall_chain = create_chains()
                     st.session_state.overall_chain=overall_chain
                     with st.spinner(
                             "Generating Mapping"
