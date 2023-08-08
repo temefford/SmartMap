@@ -35,10 +35,7 @@ poetry shell
 cd smart_map
 streamlit run main.py
 ```
-
-### Approach for retraining
-
-## Approach for Retraining on Transformation Logic
+## Approach for Retraining 
 
 ### 1. **Maintain a History of Transformations**:
 Whenever a user edits a transformation logic or successfully maps one table to another, store the mapping in a structured format.
