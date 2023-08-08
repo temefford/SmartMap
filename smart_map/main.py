@@ -67,6 +67,9 @@ if 'conv_code' not in st.session_state:
 if 'overall_chain' not in st.session_state:
     st.session_state['overall_chain'] = False
 
+if 'overall_b_chain' not in st.session_state:
+    st.session_state['overall_b_chain'] = False
+
 if 'table_b' not in st.session_state:
     st.session_state['table_b'] = False
 
@@ -329,12 +332,13 @@ def main():
                     display_file_read_error(e)
     with st.container():
          if st.session_state.table_b:  
-            overall_chain = st.session_state.overall_chain
+            overall_chain = create_chains()
+            st.session_state.overall_b_chain=overall_chain
             with st.spinner(
-                    "Generating Mapping for New Tables"
+                    "Generating Mapping"
                 ):
-                    chain_b_output = overall_chain(tables_b_prompt)
-                    st.session_state.chain_b_output=chain_b_output
+                    chain_output = overall_chain(tables_b_prompt)
+                    st.session_state.chain_b_output=chain_output
 
     with st.container():
         if st.session_state.chain_b_output:
