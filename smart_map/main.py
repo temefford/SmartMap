@@ -146,6 +146,7 @@ def create_chains():
     mapping_code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="mapping_code")
     
     template = """
+    {tables}
     For the following code, return a function that takes a pandas dataframe and uses the specifed column mappings to return a properly formatted dataframe. Return only the executable python code.
     Do not include any single quotes or reference, return just the code that can be copy-pasted into python.
     Be sure to include transformation steps: 
@@ -156,10 +157,13 @@ def create_chains():
     {mapping_code}
 
     Do not include any unnecessary lines like ('''python) and do not return any examples. Only return the function that takes a table and converts it to the desired schema.
-
+    Make sure that the code maps the appropriate columns and values from Table A to the template. If the code does not, either fix it or report an issue.
     """
     prompt_template = PromptTemplate(input_variables=["mapping_code"], template=template)
     code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
+
+
+
     overall_chain = SequentialChain(
                         chains=[initial_chain, find_similar_chain, data_mapping_chain, mapping_code_chain, code_chain],
                         input_variables=["tables"],
