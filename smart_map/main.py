@@ -328,13 +328,14 @@ def main():
                             {st.session_state.table_b}
                             \n
                             """
-                b_chain = create_chains()
-                st.session_state.overall_b_chain=b_chain
-                with st.spinner(
-                        "Generating Mapping"
-                    ):
-                        chain_output = b_chain(tables_b_prompt)
-                        st.session_state.chain_b_output=chain_output
+                if st.button("Begin Table Mapping:", type="primary"):
+                    b_chain = create_chains()
+                    st.session_state.overall_b_chain=b_chain
+                    with st.spinner(
+                            "Generating Mapping"
+                        ):
+                            chain_output = b_chain(tables_b_prompt)
+                            st.session_state.chain_b_output=chain_output
 
     with st.container():
         if st.session_state.chain_b_output:
