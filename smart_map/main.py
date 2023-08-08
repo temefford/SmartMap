@@ -317,7 +317,7 @@ def main():
             if upload_file_b:
                 try:
                     upload_string_b, upload_df_b = load_template(upload_file_b)
-                    st.session_state['table_b']=upload_string_b
+                    st.session_state['table_b']=upload_file_b
                 except Exception as e:
                     display_file_read_error(e)
                 tables_b_prompt = f"""
@@ -339,6 +339,7 @@ def main():
 
     with st.container():
         if st.session_state.chain_b_output:
+            upload_string_b, upload_df_b = load_template(upload_file_b)
             st.subheader("Python Code for Table B Conversion")
             st.markdown("Below is the code that will map your data table into the schema matching the template. Please review, make any desired modifications, and click run to confirm that the code exectutes.")
             # Verify and edit the generated code
@@ -359,10 +360,10 @@ def main():
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
                 
-                convert_table_func = create_function_from_string(user_edit_code)
+                convert_table_b_func = create_function_from_string(user_edit_code)
 
-                table_b_conv = convert_table_func(upload_df_b)   
-                st.session_state.convert_function = convert_table_func
+                table_b_conv = convert_table_b_func(upload_df_b)   
+                st.session_state.convert_function = convert_table_b_func
                 with st.expander("Show reformatted Table B"):
                     st.write(table_b_conv)
                 with st.expander("Show original Table B table"):
