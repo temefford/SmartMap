@@ -161,9 +161,7 @@ def create_chains():
     """
     prompt_template = PromptTemplate(input_variables=["tables, mapping, mapping_code"], template=template)
     code_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="code")
-
-
-
+    
     overall_chain = SequentialChain(
                         chains=[initial_chain, find_similar_chain, data_mapping_chain, mapping_code_chain, code_chain],
                         input_variables=["tables"],
